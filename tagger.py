@@ -1,5 +1,6 @@
 import tensorflow as tf
 from conllu import parse
+import numpy as np
 
 def preprocess_sentences(sentences):
     X_data = []
@@ -61,25 +62,28 @@ class MyTagger(object):
             
         self.model = None
 
-    def build_model(self, vocabulary_size = 10000):
+    def build_model(self, vocabulary_size = 10000, units = 64, output_dim = 50):
         text_vectorizer = tf.keras.layers.TextVectorization(
             output_mode="int", max_tokens=vocabulary_size, output_sequence_length=self.max_sentence_num_words
         )
         text_vectorizer.adapt(self.X_train)
         
         input_layer = tf.keras.layers.Input(shape=(self.max_sentence_num_words,), dtype=tf.int32)
-        x = tf.keras.layers.Embedding(input_dim=len(text_vectorizer.get_vocabulary()), output_dim=30)(input_layer)
-        x = tf.keras.layers.LSTM(units=64, return_sequences=True)(x)
+        x = tf.keras.layers.Embedding(input_dim=len(text_vectorizer.get_vocabulary()), output_dim=output_dim)(input_layer)
+        x = tf.keras.layers.LSTM(units=units, return_sequences=True)(x)
         x = tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(self.num_tags, activation="softmax"))(x)
         self.model = tf.keras.Model(inputs=input_layer, outputs=x)
         self.model.summary()
     
-    def train(self):
-        pass
+    def train(self, optimizer, loss, metrics, batch_size, epochs):
+        self.model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+        self.model.fit(
+            np.array(self.X_train), self.y_train, batch_size=batch_size, epochs=epochs, validation_data=(np.array(self.X_val), self.y_val), verbose=True
+        )
     
     def evaluate(self):
-        pass
+        self.model.evaluate(np.array(self.X_test), self.y_test)
     
-    def predict(self):
-        pass
+    def predict(self, sentence):
+        self.model.predict(np.array(sentence))
     
