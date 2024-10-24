@@ -60,6 +60,9 @@ class MyTagger(object):
         for i in self.sentences_over_max_length:
             self.X_train[i], self.y_train[i] = truncate_sentence(self.X_train[i], self.y_train[i], max_sentence_length=max_sentence_num_words)
             
+        unique_tags = sorted(set(tag for sublist in self.y_train for tag in sublist))
+        self.tag_to_index = {tag: idx for idx, tag in enumerate(unique_tags)}
+            
         self.model = None
 
     def build_model(self, vocabulary_size = 10000, units = 64, output_dim = 50):
@@ -85,5 +88,17 @@ class MyTagger(object):
         self.model.evaluate(np.array(self.X_test), self.y_test)
     
     def predict(self, sentence):
-        self.model.predict(np.array(sentence))
+        num_words = len(sentence.split())
+        
+        predictions = self.model.predict([sentence])
+
+        predicted_labels = []
+        for i in range(len(predictions[0])):
+            predicted_index = np.argmax(predictions[0][i])
+            for tag, index in self.tag_to_index.items():
+                if index == predicted_index:
+                    predicted_labels.append(tag)
+                    break
+
+        print(predicted_labels[:num_words])
     
