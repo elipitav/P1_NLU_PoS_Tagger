@@ -3,6 +3,7 @@ from conllu import parse
 import numpy as np
 import os
 from utils import adjust_sentences_length, process_tags, preprocess_sentences, plot_training_history
+import json
 
 class MyTagger(object):
     def __init__(self, train_filename, val_filename, test_filename):
@@ -80,6 +81,13 @@ class MyTagger(object):
         model_file = os.path.join(model_folder, model_filename)
         self.model.save(model_file)
         print(f"Model saved in {model_file}.")
+        
+        # Save the training history if provided
+        if self.history is not None:
+            history_file = os.path.join(model_folder, f"{model_filename}_training_history.json")
+            with open(history_file, 'w') as f:
+                json.dump(self.history.history, f)
+            print(f"Training history saved in {history_file}.")
     
     def reset_weights(self):
         if self.model is None:
