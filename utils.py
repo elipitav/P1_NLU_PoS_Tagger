@@ -41,7 +41,8 @@ def adjust_sentences_length(X_data, y_data, max_sentence_length=100, with_punctu
 
 def process_tags(tags):
     unique_tags = sorted(set(tag for sublist in tags for tag in sublist))
-    tag_to_index = {tag: idx for idx, tag in enumerate(unique_tags)}
+    tag_to_index = {tag: idx + 1 for idx, tag in enumerate(unique_tags)}
+    tag_to_index["PAD"] = 0
     num_tags = len(tag_to_index)
     
     return unique_tags, tag_to_index, num_tags
