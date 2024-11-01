@@ -1,4 +1,6 @@
 import matplotlib.pyplot as plt
+import json
+import plotly.graph_objects as go
 
 def preprocess_sentences(sentences):
     X_data = []
@@ -82,3 +84,31 @@ def calculate_word_frequency(sentences):
             else:
                 frequencies[word] = 1
     return frequencies
+
+def add_curve(json_file, name, color, title = "Training", fig = None):
+    
+    with open(json_file, 'r') as f:
+        data = json.load(f)
+    
+    val_loss = data.get('val_loss', [])
+    loss = data.get('loss', [])
+    
+    if fig is None:
+        fig = go.Figure()
+        fig.update_layout(title=title)
+    
+    fig.add_trace(go.Scatter(
+        y=val_loss,
+        mode='lines',
+        name=f'{name} - val_loss',
+        line=dict(dash='dash', color = color)
+    ))
+    
+    fig.add_trace(go.Scatter(
+        y=loss,
+        mode='lines',
+        name=f'{name} - loss',
+        line=dict(dash='solid', color = color)
+    ))
+    
+    return fig

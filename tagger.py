@@ -102,7 +102,7 @@ class MyTagger(object):
         else:
             print("Initial weights are not available")
     
-    def train(self, optimizer, loss, metrics, batch_size, epochs, reset_weights = True):
+    def train(self, optimizer, loss, metrics, batch_size, reset_weights = True,  patience = 5, max_epochs = 30):
         if self.model is None:
             print("The model has not been built yet")
             return
@@ -113,9 +113,17 @@ class MyTagger(object):
         
         # Compile and train the model
         self.model.compile(optimizer = optimizer, loss = loss, metrics = metrics)
-        self.history = self.model.fit(
-            np.array(self.X_train), self.y_train, batch_size=batch_size, epochs=epochs, validation_data=(np.array(self.X_val), self.y_val), verbose=True
+
+        early_stopping = tf.keras.callbacks.EarlyStopping(
+            monitor='val_loss',
+            patience=patience,     
+            restore_best_weights=True
         )
+        
+        self.history = self.model.fit(
+            np.array(self.X_train), self.y_train, batch_size=batch_size, epochs=max_epochs, validation_data=(np.array(self.X_val), self.y_val), verbose=True, callbacks = [early_stopping]
+        )
+        
         return self.history
     
     def set_weights(self, weights_filename, weights_folder = "./weights"):
