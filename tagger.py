@@ -4,6 +4,7 @@ import numpy as np
 import os
 from utils import adjust_sentences_length, process_tags, preprocess_sentences, plot_training_history
 import json
+from tqdm import tqdm
 
 class MyTagger(object):
     def __init__(self, train_filename, val_filename, test_filename):
@@ -69,7 +70,24 @@ class MyTagger(object):
         # Load the complete model
         model_file = os.path.join(model_folder, f"{model_filename}.keras")
         self.model = tf.keras.models.load_model(model_file)
+        # Load the training history if available
+        history_file = os.path.join(model_folder, f"{model_filename}_training_history.json")
+        if os.path.exists(history_file):
+            with open(history_file, 'r') as f:
+                self.history = json.load(f)
         print(f"Model loaded from {model_file}")
+    
+    def show_training_log(self):
+        epochs = len(self.history['loss'])
+
+        for epoch in tqdm(range(epochs), desc="Epochs"):
+            loss = self.history['loss'][epoch]
+            accuracy = self.history['accuracy'][epoch]
+            val_loss = self.history['val_loss'][epoch]
+            val_accuracy = self.history['val_accuracy'][epoch]
+            
+            print(f"Epoch {epoch + 1}/{epochs} - Loss: {loss:.4f}, Accuracy: {accuracy:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_accuracy:.4f}")
+
     
     def save_model(self, model_folder = "./models", model_filename = "trained_model"):
         if self.model is None:
@@ -125,28 +143,6 @@ class MyTagger(object):
         )
         
         return self.history
-    
-    def set_weights(self, weights_filename, weights_folder = "./weights"):
-        if self.model is None:
-            print("The model has not been built yet")
-            return
-        
-        # Load the weights from the file
-        weights_file = os.path.join(weights_folder,f"{ weights_filename}.h5")
-        self.model.load_weights(weights_file)
-    
-    def save_weights(self, weights_folder = "./weights", weights_filename = "saved_weights"):
-        if self.model is None:
-            print("The model has not been built yet")
-            return
-        
-        # Create the folder if it does not exist
-        os.makedirs(weights_folder, exist_ok=True)
-
-        # Save the weights of the model
-        weights_file = os.path.join(weights_folder, f"{weights_filename}.h5")
-        self.model.save_weights(weights_file)
-        print(f"Weights stored in {weights_file}")
         
     def plot_training_history(self):
         plot_training_history(self.history)
@@ -166,12 +162,15 @@ class MyTagger(object):
             print("The model has not been built yet")
             return
         
-        num_words = len(sentence.split())
+        splitted_sentece = sentence.split()
+        num_words = len(splitted_sentece)
         predictions = self.model.predict([sentence])
         predicted_labels = []
         for i in range(len(predictions[0])):
             predicted_index = np.argmax(predictions[0][i])
             predicted_labels.append(self.index_to_tag[predicted_index])
-
-        print(f"Prediction: {predicted_labels[:num_words]}")
+            
+        print(f"Prediction for '{sentence}': ")
+        for i in range(num_words):
+            print(f"{splitted_sentece[i]} -> {predicted_labels[i]}")
     
