@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
-<<<<<<< HEAD
 import json
 import plotly.graph_objects as go
-=======
 import numpy as np
 
 
@@ -40,8 +38,6 @@ def plot_sentence_length_histogram(sentences):
     plt.ylabel("Frequency")
     plt.title("Sentence length histogram")
     plt.show()
-
->>>>>>> edbb55c45ab5b037ac862deca5264556ba82bc01
 
 def preprocess_sentences(sentences):
     X_data = []
@@ -133,7 +129,6 @@ def calculate_word_frequency(sentences):
             else:
                 frequencies[word] = 1
     return frequencies
-<<<<<<< HEAD
 
 def add_curve(json_file, name, color, title = "Training", fig = None):
     
@@ -162,5 +157,3 @@ def add_curve(json_file, name, color, title = "Training", fig = None):
     ))
     
     return fig
-=======
->>>>>>> edbb55c45ab5b037ac862deca5264556ba82bc01
