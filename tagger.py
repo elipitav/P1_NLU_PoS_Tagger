@@ -102,7 +102,7 @@ class MyTagger(object):
         else:
             print("Initial weights are not available")
     
-    def train(self, optimizer, loss, metrics, batch_size, reset_weights = True,  patience = 5, max_epochs = 30):
+    def train(self, optimizer, metrics, batch_size, loss="sparse_categorical_crossentropy", reset_weights = True,  patience = 5, max_epochs = 30):
         if self.model is None:
             print("The model has not been built yet")
             return
