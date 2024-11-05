@@ -4,7 +4,6 @@ import numpy as np
 import os
 from utils import adjust_sentences_length, process_tags, preprocess_sentences, plot_training_history
 import json
-from tqdm import tqdm
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -83,7 +82,7 @@ class MyTagger(object):
     def show_training_log(self):
         epochs = len(self.history['loss'])
 
-        for epoch in tqdm(range(epochs), desc="Epochs"):
+        for epoch in range(epochs):
             loss = self.history['loss'][epoch]
             accuracy = self.history['accuracy'][epoch]
             val_loss = self.history['val_loss'][epoch]
@@ -167,44 +166,59 @@ class MyTagger(object):
         except Exception as e:
             print(f"The model has not been compiled yet. Error: {e}")
     
-    def predict(self, sentence):
+    def predict(self, sentences):
         if self.model is None:
             print("The model has not been built yet")
             return
         
-        splitted_sentece = sentence.split()
-        num_words = len(splitted_sentece)
-        predictions = self.model.predict([sentence])
-        predicted_labels = []
-        for i in range(len(predictions[0])):
-            predicted_index = np.argmax(predictions[0][i])
-            predicted_labels.append(self.index_to_tag[predicted_index])
+        # Check if the input is a single sentence or a list of sentences
+        if isinstance(sentences, str):
+            sentences = [sentences]
+        
+        predictions = []
+        for sentence in sentences:
+            splitted_sentence = sentence.split()
+            num_words = len(splitted_sentence)
             
-        print(f"Prediction for '{sentence}': ")
-        for i in range(num_words):
-            print(f"{splitted_sentece[i]} -> {predicted_labels[i]}")
+            pred = self.model.predict([sentence])
+            predicted_labels = [
+                self.index_to_tag[np.argmax(word)] for word in pred[0]
+            ][:num_words]
+            
+            predictions.append((splitted_sentence, predicted_labels))
+            
+            if len(sentences) == 1:
+                print(f"Prediction for '{sentence}':")
+                for word, label in zip(splitted_sentence, predicted_labels):
+                    print(f"\t{word} -> {label}")
+    
+        return predictions
     
     def plot_confusion_matrix(self):
         if self.model is None:
             print("The model has not been built yet")
             return
         
-        # Obtener las predicciones en el conjunto de prueba
-        y_pred = self.model.predict(np.array(self.X_test))
+        # Initialize the confusion matrix ignoring the padding (class 0)
+        confusion = np.zeros((self.num_tags-1, self.num_tags-1))
         
-        # Convertir predicciones y etiquetas reales en listas planas
-        y_pred_flat = [np.argmax(word) for sentence in y_pred for word in sentence]
-        y_true_flat = [tag for sentence in self.y_test for tag in sentence]
+        # Get the predictions for the test set ignoring the padding
+        predictions = self.model.predict(np.array(self.X_test))
+        predictions = np.argmax(predictions, axis = -1)
         
-        # Generar la matriz de confusión
-        cm = confusion_matrix(y_true_flat, y_pred_flat, labels=list(self.tag_to_index.values()))
+        # Compute the confusion matrix
+        for i in range(len(self.y_test)):
+            for j in range(len(self.y_test[i])):
+                if self.y_test[i][j] == 0:
+                    continue
+                confusion[self.y_test[i][j]-1, predictions[i][j]-1] += 1
+                
+        # Plot the confusion matrix
+        plt.figure(figsize=(10, 10))
+        sns.heatmap(confusion, annot=True, fmt='g', xticklabels=self.unique_tags, yticklabels=self.unique_tags, cmap = "Blues")
+        plt.xlabel('Predicted labels')
+        plt.ylabel('True labels')
+        plt.title('Confusion matrix')
         
-        # Graficar la matriz de confusión
-        plt.figure(figsize=(12, 10))
-        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=self.unique_tags, yticklabels=self.unique_tags)
-        plt.xlabel("Predicted labels")
-        plt.ylabel("True labels")
-        plt.title("Confusion Matrix")
-        plt.show()
 
     
