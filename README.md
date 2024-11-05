@@ -62,9 +62,9 @@ For Irish, we performed minimal tuning, focusing solely on the LSTM units. Simil
 
 ## Authors :busts_in_silhouette:
 
-- [Antón Gómez López]()
-- [Eliseo Pita Vilariño]()
-- [Alejandro Esperón Couceiro]()
+- [Alejandro Esperón Couceiro](https://github.com/Alexec02)
+- [Antón Gómez López](https://github.com/antongomez)
+- [Eliseo Pita Vilariño](https://github.com/elipitav)
 
 ## License :page_facing_up:
 
