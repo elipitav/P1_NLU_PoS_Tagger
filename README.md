@@ -1,6 +1,6 @@
 # English, Galician and Irish PoS Taggers
 
-This repository contains the implementation of the second assignment of the course of Natural Language Processing of the Master in Artificial Intelligence at the University of Santiago de Compostela. In this assignment, we trained a PoS tagger for English, Galician and Irish languages using the Universal Dependencies corpora.
+This repository contains the implementation of the second assignment of the course of Natural Language Processing of the Master in Artificial Intelligence at the University of Santiago de Compostela. In this assignment, we trained a PoS tagger for English, Galician and Irish languages using the [Universal Dependencies](https://universaldependencies.org/) corpora.
 
 ## Project structure :open_file_folder:
 
