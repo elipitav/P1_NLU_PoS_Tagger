@@ -34,6 +34,12 @@ The datasets used for training and testing the taggers are the following:
 
 All the datasets are available in the `data/` folder. The datasets are already split into training validation and testing sets.
 
+## Usage :writing_hand:
+
+The notebooks are self-contained and can be run independently. Simply running the cells in each notebook will load the pre-trained models stored in the `./models` directory and evaluate them. This avoids the need to retrain the models, which can be time-consuming.
+
+If you want to retrain the models, the necessary code is provided as comments in each cell where the model is loaded. To do this, uncomment the code for training, comment out the code for loading the models, and then run the cells.
+
 ## Model training and hyperparameter tuning :microscope:
 
 **Step 1: Training the English Tagger**
