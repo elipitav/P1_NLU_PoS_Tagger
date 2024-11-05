@@ -5,6 +5,9 @@ import os
 from utils import adjust_sentences_length, process_tags, preprocess_sentences, plot_training_history
 import json
 from tqdm import tqdm
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 class MyTagger(object):
     def __init__(self, train_filename, val_filename, test_filename):
@@ -106,7 +109,7 @@ class MyTagger(object):
         if self.history is not None:
             history_file = os.path.join(model_folder, f"{model_filename}_training_history.json")
             with open(history_file, 'w') as f:
-                json.dump(self.history.history, f)
+                json.dump(self.history, f)
             print(f"Training history saved in {history_file}")
     
     def reset_weights(self):
@@ -138,9 +141,16 @@ class MyTagger(object):
             restore_best_weights=True
         )
         
-        self.history = self.model.fit(
+        history = self.model.fit(
             np.array(self.X_train), self.y_train, batch_size=batch_size, epochs=max_epochs, validation_data=(np.array(self.X_val), self.y_val), verbose=True, callbacks = [early_stopping]
         )
+        
+        self.history = {
+            "loss": history.history["loss"],
+            "accuracy": history.history["accuracy"],
+            "val_loss": history.history["val_loss"],
+            "val_accuracy": history.history["val_accuracy"]
+        }
         
         return self.history
         
@@ -173,4 +183,28 @@ class MyTagger(object):
         print(f"Prediction for '{sentence}': ")
         for i in range(num_words):
             print(f"{splitted_sentece[i]} -> {predicted_labels[i]}")
+    
+    def plot_confusion_matrix(self):
+        if self.model is None:
+            print("The model has not been built yet")
+            return
+        
+        # Obtener las predicciones en el conjunto de prueba
+        y_pred = self.model.predict(np.array(self.X_test))
+        
+        # Convertir predicciones y etiquetas reales en listas planas
+        y_pred_flat = [np.argmax(word) for sentence in y_pred for word in sentence]
+        y_true_flat = [tag for sentence in self.y_test for tag in sentence]
+        
+        # Generar la matriz de confusión
+        cm = confusion_matrix(y_true_flat, y_pred_flat, labels=list(self.tag_to_index.values()))
+        
+        # Graficar la matriz de confusión
+        plt.figure(figsize=(12, 10))
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=self.unique_tags, yticklabels=self.unique_tags)
+        plt.xlabel("Predicted labels")
+        plt.ylabel("True labels")
+        plt.title("Confusion Matrix")
+        plt.show()
+
     

@@ -98,8 +98,8 @@ def plot_training_history(history):
 
     # Loss plot
     plt.subplot(1, 2, 1)
-    plt.plot(history.history["loss"], label="Training Loss")
-    plt.plot(history.history["val_loss"], label="Validation Loss")
+    plt.plot(history["loss"], label="Training Loss")
+    plt.plot(history["val_loss"], label="Validation Loss")
     plt.title("Model Loss")
     plt.ylabel("Loss")
     plt.xlabel("Epochs")
@@ -107,8 +107,8 @@ def plot_training_history(history):
 
     # Accuracy plot
     plt.subplot(1, 2, 2)
-    plt.plot(history.history["accuracy"], label="Training Accuracy")
-    plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
+    plt.plot(history["accuracy"], label="Training Accuracy")
+    plt.plot(history["val_accuracy"], label="Validation Accuracy")
     plt.title("Model Accuracy")
     plt.ylabel("Accuracy")
     plt.xlabel("Epochs")
